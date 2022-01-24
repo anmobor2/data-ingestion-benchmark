@@ -11,7 +11,6 @@ before_script:
   - echo "IDs:" && id
   - echo "Hostname:" && hostname
   - echo "Current directory:" && pwd
-  - echo "Go version:" && go version
 
 stages:
   - build
