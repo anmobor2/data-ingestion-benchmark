@@ -8,13 +8,16 @@ CONTAINER_REGISTRY := 224392328862.dkr.ecr.eu-west-1.amazonaws.com
 psrecorder: build-psrecorder kind-load kind-apply kind-restart
 
 
+ecr-login:
+	aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin 224392328862.dkr.ecr.eu-west-1.amazonaws.com
+
 build-psrecorder:
 	docker build \
 		-f deployment/docker/psrecorder.dockerfile \
 		-t $(DOCKER_IMAGE_NAME):$(VERSION) \
 		.
 
-push-psrecorder:
+push-psrecorder: ecr-login
 	docker tag $(DOCKER_IMAGE_NAME):$(VERSION) $(CONTAINER_REGISTRY)/$(DOCKER_IMAGE_NAME):$(VERSION)
 	docker push $(CONTAINER_REGISTRY)/$(DOCKER_IMAGE_NAME):$(VERSION)
 
