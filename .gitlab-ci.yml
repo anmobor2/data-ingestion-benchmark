@@ -19,4 +19,6 @@ stages:
 build:
   stage: build
   script:
-    - make psrecorder
+    - make build-psrecorder
+    - make push-psrecorder
+
