@@ -15,7 +15,7 @@ build-psrecorder:
 		.
 
 push-psrecorder:
-	docker tag $(CONTAINER_REGISTRY)/$(DOCKER_IMAGE_NAME):$(VERSION)
+	docker tag $(DOCKER_IMAGE_NAME):$(VERSION) $(CONTAINER_REGISTRY)/$(DOCKER_IMAGE_NAME):$(VERSION)
 	docker push $(CONTAINER_REGISTRY)/$(DOCKER_IMAGE_NAME):$(VERSION)
 
 kind-up:
