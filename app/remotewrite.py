@@ -19,7 +19,7 @@ def dt2ts(dt):
     return calendar.timegm(dt.utctimetuple())
 
 
-def write(ts, value, metric, labels):
+def write(url, ts, value, metric, labels):
     write_request = WriteRequest()
 
     series = write_request.timeseries.add()
@@ -43,8 +43,6 @@ def write(ts, value, metric, labels):
     uncompressed = write_request.SerializeToString()
     compressed = snappy.compress(uncompressed)
 
-    #url = "http://localhost:9090/api/v1/prom/remote/write"
-    url = "http://host.docker.internal:9090/api/v1/write"
     headers = {
         "Content-Encoding": "snappy",
         "Content-Type": "application/x-protobuf",
@@ -58,4 +56,4 @@ def write(ts, value, metric, labels):
         print(e)
 
 if __name__ == "__main__":
-    write(datetime.utcnow(), random.randint(210, 230), "voltage", {"device": "wola", "deviceType": "raption"})
+    write("http://host.docker.internal:9090/api/v1/write", datetime.utcnow(), random.randint(210, 230), "voltage", {"device": "wola", "deviceType": "raption"})

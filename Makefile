@@ -21,6 +21,7 @@ push-psrecorder: ecr-login
 	docker tag $(DOCKER_IMAGE_NAME):$(VERSION) $(CONTAINER_REGISTRY)/$(DOCKER_IMAGE_NAME):$(VERSION)
 	docker push $(CONTAINER_REGISTRY)/$(DOCKER_IMAGE_NAME):$(VERSION)
 
+
 kind-up:
 	kind create cluster \
 		--image kindest/node:v1.21.1@sha256:69860bda5563ac81e3c0057d654b5253219618a22ec3a346306239bba8cfa1a6 \
@@ -52,6 +53,11 @@ kind-status:
 kind-restart:
 	kubectl rollout restart deployment psrecorder
 
-
 kind-logs:
 	kubectl logs -l app=psrecorder --all-containers=true -f --tail=100
+
+promscale-apply:
+	kubectl apply -f deployment/k8s/base/promscale/promscale.yaml
+
+promscale-status:
+	kubectl get pods -o wide --watch

@@ -16,10 +16,16 @@ stages:
   - build
 
 
-build:
+build-psrecorder:
   stage: build
   script:
     - apt-get update && apt-get install -y build-essential
     - make build-psrecorder
     - make push-psrecorder
-
+  only:
+    refs:
+      - branches
+    changes:
+      - app
+      - deployment/docker/psrecorder.dockerfile
+      - deployment/k8s/base/psrecorder-pod

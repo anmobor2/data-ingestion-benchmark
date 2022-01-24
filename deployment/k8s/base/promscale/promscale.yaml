@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: promscale
+spec:
+  selector:
+    matchLabels:
+      app: promscale
+  template:
+    metadata:
+      labels:
+        app: promscale
+    spec:
+      dnsPolicy: ClusterFirstWithHostNet
+      hostNetwork: true
+      terminationGracePeriodSeconds: 60
+      containers:
+      - name: timescaledb
+        image: timescaledev/promscale-extension:latest-ts2-pg13
+        #command: ["postgres"]
+        #args: ["-csynchronous_commit=off"]
+        env:
+          - name: POSTGRES_PASSWORD
+            value: admin
+        ports:
+          - name: timescale
+            containerPort: 5432
+      - name: promscale
+        image: timescale/promscale:latest
+        env:
+          - name: PROMSCALE_DB_URI
+            value: "postgres://postgres:admin@localhost:5432/postgres?sslmode=allow"
+        ports:
+          - name: promscale
+            containerPort: 9201
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: promscale-service
+spec:
+  type: ClusterIP
+  selector:
+    app: promscale
+  ports:
+    - name: promscale
+      port: 9201
+      targetPort: promscale
