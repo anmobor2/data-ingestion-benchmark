@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: psrecorder
+spec:
+  selector:
+    matchLabels:
+      app: psrecorder
+  template:
+    metadata:
+      labels:
+        app: psrecorder
+    spec:
+      dnsPolicy: ClusterFirstWithHostNet
+      hostNetwork: true
+      terminationGracePeriodSeconds: 60
+      containers:
+      - name: psrecorder
+        image: psrecorder:1.0
+        command: ["python3"]
+        args: ["-m", "app.psrecorder"]
+        envFrom:
+          - secretRef:
+              name: psrecorder-secrets
