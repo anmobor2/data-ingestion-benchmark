@@ -26,6 +26,6 @@ build-psrecorder:
     refs:
       - branches
     changes:
-      - app
+      - app/*
       - deployment/docker/psrecorder.dockerfile
       - deployment/k8s/base/psrecorder-pod
