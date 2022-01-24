@@ -2,7 +2,7 @@
 KIND_NAMESPACE := myc-ingestion-test
 KIND_CLUSTER := myc-ingestion-benchmark
 VERSION := 1.0
-DOCKER_IMAGE_NAME := "psrecorder"
+DOCKER_IMAGE_NAME := psrecorder
 CONTAINER_REGISTRY := 224392328862.dkr.ecr.eu-west-1.amazonaws.com
 
 psrecorder: build-psrecorder kind-load kind-apply kind-restart
