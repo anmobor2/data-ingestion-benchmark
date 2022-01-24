@@ -27,7 +27,6 @@ BUCKET = "myc-ingestion-sample-recorded-data"
 
 s3 = boto3.client('s3')
 
-
 def get_data(url, devices, ts):
     ps = PowerStudio(url)
     for device in devices.split(','):
