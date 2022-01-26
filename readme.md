@@ -1,3 +1,29 @@
+# MYC Data Ingestion Benchmark 
+
+## Components
+
+- app: Python Toolkit with a set of utilities
+- prosmcale: Prometheus on Timescale
+- vernemq: MQTT Broker
+- grafana: Grafana
+
+## Python Toolkit
+
+- ps2prom: Small API that exposes a /metrics endpoints based on data from a Power Studio Scada
+- psrecorder: small cli tool to scrap data every X minuts from power studio and store it in a S3 bucket
+- s3mqtt: small cli tool to push data from s3 to an mqtt broker
+- verne2promscale: small verne plugin that pushes data to promscale
+- lib: common files to all applications
+
+## Layers
+
+- app: Contains all python applications that are build on a single docker image. All the apis, and cli utilities are in the same docker image
+- data: some sample data
+- deployment: All files needed to deploy all the components
+
+
+## Old documentation
+
 Run ps2prom server
 
     uvicorn main:app --reload --port=9001
