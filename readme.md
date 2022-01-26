@@ -18,7 +18,7 @@
 ## Layers
 
 - app: Contains all python applications that are build on a single docker image. All the apis, and cli utilities are in the same docker image
-- data: some sample data
+- samples: some sample data
 - deployment: All files needed to deploy all the components
 
 

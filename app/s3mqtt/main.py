@@ -9,7 +9,7 @@ import click
 @click.option('--filename')
 def run(host, port, token, filename):
     client = mqtt.Client()
-    #client.username_pw_set(token, password=None)
+    client.username_pw_set(token, password=None)
     client.connect(host=host, port=port)
     with open(filename, 'r') as f:
         body = f.read()

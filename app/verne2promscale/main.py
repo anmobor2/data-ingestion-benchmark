@@ -30,6 +30,9 @@ async def auth_on_publish(request: Request):
 async def auth_on_register(request: Request):
     print(request.headers)
     print(await request.json())
+
+    # VALIDATE TOKEN
+
     return {"result": "ok"}
 
 
@@ -38,5 +41,7 @@ async def on_publish(request: Request):
     print(request.headers)
     #print(request.data)
     print(await request.json())
+
+    # SEND DATA TO PROMSCALE
 
     return {"result": "ok"}
