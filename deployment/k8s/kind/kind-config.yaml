@@ -9,3 +9,7 @@ nodes:
         hostPort: 9201
       - containerPort: 3000
         hostPort: 3000
+      - containerPort: 1883
+        hostPort: 1883
+      - containerPort: 8082
+        hostPort: 8082

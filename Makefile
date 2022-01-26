@@ -2,22 +2,22 @@
 KIND_NAMESPACE := myc-ingestion-test
 KIND_CLUSTER := myc-ingestion-benchmark
 VERSION := 1.0
-DOCKER_IMAGE_NAME := psrecorder
+DOCKER_IMAGE_NAME := pyingestiontoolkit
 CONTAINER_REGISTRY := 224392328862.dkr.ecr.eu-west-1.amazonaws.com
 
-psrecorder: build-psrecorder kind-load kind-apply kind-restart
+psrecorder: build-pytoolkit kind-load kind-apply kind-restart
 
 
 ecr-login:
 	aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin 224392328862.dkr.ecr.eu-west-1.amazonaws.com
 
-build-psrecorder:
+build-pytoolkit:
 	docker build \
-		-f deployment/docker/psrecorder.dockerfile \
+		-f deployment/docker/pyingestiontoolkit.dockerfile \
 		-t $(DOCKER_IMAGE_NAME):$(VERSION) \
 		.
 
-push-psrecorder: ecr-login
+push-pytoolkit: ecr-login
 	docker tag $(DOCKER_IMAGE_NAME):$(VERSION) $(CONTAINER_REGISTRY)/$(DOCKER_IMAGE_NAME):$(VERSION)
 	docker push $(CONTAINER_REGISTRY)/$(DOCKER_IMAGE_NAME):$(VERSION)
 
@@ -36,15 +36,15 @@ kind-down:
 kind-load:
 	kind load docker-image $(DOCKER_IMAGE_NAME):$(VERSION) --name $(KIND_CLUSTER)
 
-kind-secrets:
-	kubectl create secret generic psrecorder-secrets --from-env-file=.env \
+psrecorder-secrets:
+	kubectl create secret generic psrecorder-secrets --from-env-file=psrecorder.env \
 		--save-config --dry-run=client \
  		-o yaml | kubectl apply -f -
 
-kind-show-secrets:
+psrecorder-show-secrets:
 	kubectl get secret psrecorder-secrets -o json | jq '.data | map_values(@base64d)'
 
-kind-apply:
+psrecorder-apply:
 	kubectl apply -f deployment/k8s/base/psrecorder-pod/psrecorder.yaml
 
 kind-status:
@@ -53,11 +53,23 @@ kind-status:
 kind-restart:
 	kubectl rollout restart deployment psrecorder
 
-kind-logs:
+psrecorder-logs:
 	kubectl logs -l app=psrecorder --all-containers=true -f --tail=100
 
 promscale-apply:
 	kubectl apply -f deployment/k8s/base/promscale/promscale.yaml
+
+grafana-apply:
+	kubectl apply -f deployment/k8s/base/grafana/grafana.yaml
+
+vernemq-apply:
+	kubectl apply -f deployment/k8s/base/vernemq/vernemq.yaml
+
+vernemq-delete:
+	kubectl delete -f deployment/k8s/base/vernemq/vernemq.yaml
+
+verne-logs:
+	kubectl logs -l app=vernemq --all-containers=true -f --tail=100
 
 promscale-status:
 	kubectl get pods -o wide --watch

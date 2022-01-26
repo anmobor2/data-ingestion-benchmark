@@ -1,5 +1,5 @@
 from datetime import datetime
-from prometheus_pb2 import (
+from app.lib.prometheus import (
     TimeSeries,
     Label,
     Labels,

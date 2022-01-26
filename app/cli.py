@@ -1,6 +1,6 @@
 from lib import PowerStudio
 from datetime import datetime, date
-from app.remotewrite import write
+from app.lib.remotewrite import write
 
 def run():
     ps = PowerStudio("https://powerstudio.circutor.com")

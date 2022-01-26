@@ -27,5 +27,5 @@ build-psrecorder:
       - branches
     changes:
       - app/*
-      - deployment/docker/psrecorder.dockerfile
+      - deployment/docker/pyingestiontoolkit.dockerfile
       - deployment/k8s/base/psrecorder-pod

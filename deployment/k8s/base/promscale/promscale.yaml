@@ -17,8 +17,6 @@ spec:
       containers:
       - name: timescaledb
         image: timescaledev/promscale-extension:latest-ts2-pg13
-        #command: ["postgres"]
-        #args: ["-csynchronous_commit=off"]
         env:
           - name: POSTGRES_PASSWORD
             value: admin
@@ -33,6 +31,8 @@ spec:
         ports:
           - name: promscale
             containerPort: 9201
+
+
 ---
 apiVersion: v1
 kind: Service

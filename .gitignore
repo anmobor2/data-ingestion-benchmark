@@ -1,1 +1,16 @@
-.env
+# Editor files
+.idea/
+*.iml
+*.swp
+
+# Mac
+.DS_Store
+
+# env vars
+psrecorder.env
+
+# Python
+*.pyc
+
+# prometheus data folder
+data

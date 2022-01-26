@@ -16,7 +16,7 @@ spec:
       terminationGracePeriodSeconds: 60
       containers:
       - name: psrecorder
-        image: 224392328862.dkr.ecr.eu-west-1.amazonaws.com/psrecorder:1.0
+        image: psrecorder:1.0
         command: ["python3"]
         args: ["-m", "app.psrecorder"]
         envFrom:

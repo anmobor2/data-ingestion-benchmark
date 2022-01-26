@@ -34,3 +34,7 @@ Add aws credentials
 
     export AWS_ACCESS_KEY_ID=XXX
     export AWS_SECRET_KEY_SECRET=xxx
+
+Start verne with docker
+
+    docker run -p 1884:1883 --env-file=deployment/docker/verne.env -h vmq0.local  --platform linux/amd64  vernemq/vernemq

@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: verne2promscale
+spec:
+  selector:
+    matchLabels:
+      app: verne2promscale
+  template:
+    metadata:
+      labels:
+        app: verne2promscale
+    spec:
+      dnsPolicy: ClusterFirstWithHostNet
+      hostNetwork: true
+      terminationGracePeriodSeconds: 60
+      containers:
+      - name: verne2promscale
+        image: psrecorder:1.0
+        command: ["uvicorn"]
+        args: ["app.verne2promscale.main:app", "--host", "0.0.0.0", "--port", "8082"]
+        ports:
+          - name: verne2promscale
+            containerPort: 8082
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: verne2promscale-service
+spec:
+  type: ClusterIP
+  selector:
+    app: verne2promscale
+  ports:
+    - name: verne2promscale
+      port: 8082
+      targetPort: verne2promscale
