@@ -23,9 +23,7 @@ build-pytoolkit:
     - make build-pytoolkit
     - make push-pytoolkit
   only:
-    refs:
-      - branches
     changes:
       - app/*
       - deployment/docker/pyingestiontoolkit.dockerfile
-      - deployment/k8s/base/psrecorder-pod
+      - deployment/k8s/base/psrecorder

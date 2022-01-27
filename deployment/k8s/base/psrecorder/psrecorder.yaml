@@ -16,9 +16,10 @@ spec:
       terminationGracePeriodSeconds: 60
       containers:
       - name: psrecorder
-        image: psrecorder:1.0
+        image: pyingestiontoolkit:1.0
+        imagePullPolicy: Always
         command: ["python3"]
-        args: ["-m", "app.psrecorder"]
+        args: ["-m", "app.psrecorder.main"]
         envFrom:
           - secretRef:
               name: psrecorder-secrets

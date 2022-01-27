@@ -45,16 +45,21 @@ psrecorder-show-secrets:
 	kubectl get secret psrecorder-secrets -o json | jq '.data | map_values(@base64d)'
 
 psrecorder-apply:
-	kubectl apply -f deployment/k8s/base/psrecorder-pod/psrecorder.yaml
-
-kind-status:
-	kubectl get pods -o wide --watch
+	kubectl apply -f deployment/k8s/base/psrecorder/psrecorder.yaml
 
 psrecorder-restart:
 	kubectl rollout restart deployment psrecorder
 
 psrecorder-logs:
 	kubectl logs -l app=psrecorder --all-containers=true -f --tail=100
+
+
+kind-status:
+	kubectl get pods -o wide --watch
+
+kind-pods:
+	kubectl get pods -o wide
+
 
 promscale-apply:
 	kubectl apply -f deployment/k8s/base/promscale/promscale.yaml
@@ -73,6 +78,9 @@ verne-logs:
 
 verne2prom-apply:
 	kubectl apply -f deployment/k8s/base/verne2promscale/verne2promscale.yaml
+
+verne2prom-delete:
+	kubectl delete -f deployment/k8s/base/verne2promscale/verne2promscale.yaml
 
 verne2prom-logs:
 	kubectl logs -l app=verne2promscale --all-containers=true -f --tail=100
