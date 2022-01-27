@@ -4,6 +4,10 @@ import xmltodict
 from datetime import datetime
 import json
 
+import urllib3
+
+urllib3.disable_warnings()
+
 class PowerStudio:
     def __init__(self, url):
         self.url = url
@@ -50,7 +54,7 @@ class PowerStudio:
         for v in data['values']['variable']:
             if 'value' in v:
                 device, var = self.split(v['id'])
-                value = v['value']
+                value = float(v['value'])
                 #print(device, '=>', var, '=', value)
                 values.append({'device': device, 'var': var, 'value': value})
         return values
@@ -83,7 +87,7 @@ class PowerStudio:
 
         output = {'device': id, 'tags': tags, "values": {}, 'ts': ts.strftime("%Y-%m-%dT%H%M%S")}
         for value in values:
-            output["values"][value["var"]] = value['value']
+            output["values"][value["var"]] = float(value['value'])
         return output
 
 
@@ -105,7 +109,7 @@ class PowerStudio:
         for record in data["recordGroup"]["record"]:
             r = {"ts": record["dateTime"], "values": {} }
             for field in record["field"]:
-                r["values"][field["id"]] = field["value"]
+                r["values"][field["id"]] = float(field["value"])
             print(r)
             values.append(r)
         return values

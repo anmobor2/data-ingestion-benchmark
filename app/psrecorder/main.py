@@ -1,4 +1,4 @@
-from app.lib import PowerStudio
+from app.lib.powerstudio import PowerStudio
 import boto3
 import io
 import json
@@ -23,39 +23,49 @@ devices = ["0CR02-0", "0CR04-1.AC-Meter", "0CR02-12.PLUG A - Meter", "4CR02-13.P
                "0CR04-3.PLUG A - Meter", "4CR02-13.EVSE.PLUG A"]
 '''
 
-BUCKET = "myc-ingestion-sample-recorded-data"
-
 s3 = boto3.client('s3')
 
-def get_data(url, devices, ts):
+def get_data(url, devices, ts, bucket):
     ps = PowerStudio(url)
     for device in devices.split(','):
         buff = io.StringIO()
         try:
             row = ps.get_json(device, ts=ts)
         except Exception as e:
-            print('ERROR GETTING', device, '=>', e)
-        print(row)
+            print('ERROR getting', device, '=>', e)
+        print('got', len(row['values']), 'variables from', device)
         buff.write(json.dumps(row))
+        filename = "psdata/{device}/{ts}.json".format(device=device, ts=ts.strftime("%Y%m%dT%H%M%S"))
+        print(filename)
         s3.upload_fileobj(
             io.BytesIO(buff.getvalue().encode()),
-            BUCKET,
-            "psdata/{device}/".format(device=device) + ts.strftime("%Y%m%dT%H%M%S") + ".json"
+            bucket,
+            filename
         )
+        print('STORED FILE as ', filename, 'IN', bucket)
 
 
 @click.command()
 @click.option('--url', default="https://powerstudio.circutor.com", help='Power Studio Url')
 @click.option('--devices', envvar="DEVICES", help='List of devices')
+@click.option('--bucket', envvar="BUCKET", help='S3 Bucket')
 @click.option('--interval', default=5, help='Interval between records')
-def run(url, devices, interval):
+@click.option('--daemon/--no-daemon', default=True)
+def run(url, devices, interval, daemon, bucket):
+    if not daemon:
+        print('getting', devices, 'from', url, 'a single time', interval)
+        now = datetime.now()
+        get_data(url, devices, now, bucket)
+        exit()
+
+    print('getting', devices, 'from', url, 'at interval', interval)
     killer = GracefulKiller()
-    print('GETTING', devices, 'FROM', url, 'AT INTERVAL', interval)
     while not killer.kill_now:
         now = datetime.now()
-        print(now)
+        if now.second == 0:
+            print(now)
         if now.second == 0 and now.minute % interval == 0:
-            get_data(url, devices, now)
+            get_data(url, devices, now, bucket)
         time.sleep(1)
         sys.stdout.flush()
     print("End of the program. I was killed gracefully :)")
