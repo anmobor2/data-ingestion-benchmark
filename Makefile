@@ -50,7 +50,7 @@ psrecorder-apply:
 kind-status:
 	kubectl get pods -o wide --watch
 
-kind-restart:
+psrecorder-restart:
 	kubectl rollout restart deployment psrecorder
 
 psrecorder-logs:
@@ -70,6 +70,15 @@ vernemq-delete:
 
 verne-logs:
 	kubectl logs -l app=vernemq --all-containers=true -f --tail=100
+
+verne2prom-apply:
+	kubectl apply -f deployment/k8s/base/verne2promscale/verne2promscale.yaml
+
+verne2prom-logs:
+	kubectl logs -l app=verne2promscale --all-containers=true -f --tail=100
+
+verne2prom-restart:
+	kubectl rollout restart deployment verne2promscale
 
 promscale-status:
 	kubectl get pods -o wide --watch
