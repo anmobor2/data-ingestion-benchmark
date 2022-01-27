@@ -32,7 +32,6 @@ def get_data(url, devices, ts, bucket):
         print('got', len(row['values']), 'variables from', device)
         buff.write(json.dumps(row))
         filename = "psdata/{device}/{ts}.json".format(device=device, ts=ts.strftime("%Y%m%dT%H%M%S"))
-        print(filename)
         s3.upload_fileobj(
             io.BytesIO(buff.getvalue().encode()),
             bucket,
