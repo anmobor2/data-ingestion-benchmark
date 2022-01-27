@@ -16,12 +16,12 @@ stages:
   - build
 
 
-build-psrecorder:
+build-pytoolkit:
   stage: build
   script:
     - apt-get update && apt-get install -y build-essential
-    - make build-psrecorder
-    - make push-psrecorder
+    - make build-pytoolkit
+    - make push-pytoolkit
   only:
     refs:
       - branches
