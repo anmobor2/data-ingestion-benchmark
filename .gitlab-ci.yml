@@ -25,5 +25,6 @@ build-pytoolkit:
   only:
     changes:
       - app/*
+      - app/*/*
       - deployment/docker/pyingestiontoolkit.dockerfile
       - deployment/k8s/base/psrecorder

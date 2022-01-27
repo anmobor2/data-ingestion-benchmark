@@ -18,10 +18,6 @@ class GracefulKiller:
   def exit_gracefully(self, *args):
     self.kill_now = True
 
-'''
-devices = ["0CR02-0", "0CR04-1.AC-Meter", "0CR02-12.PLUG A - Meter", "4CR02-13.PLUG A - Meter",
-               "0CR04-3.PLUG A - Meter", "4CR02-13.EVSE.PLUG A"]
-'''
 
 s3 = boto3.client('s3')
 
