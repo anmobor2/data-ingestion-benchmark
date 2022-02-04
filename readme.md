@@ -68,3 +68,17 @@ Start verne with docker
 Start verne2promscale without docker or kubernetes, directly with python as api rest using uvicorn in port 8889
 
     uvicorn app.verne2promscale.main:app  --host 0.0.0.0 --port 8889
+
+
+Start influxdb
+
+    mkdir influx-data
+    docker run \
+        --name influxdb \
+        -p 8086:8086 \
+        --volume $PWD/influx-data:/var/lib/influxdb2 \
+        influxdb:2.0.9
+
+    Goto localhost:8086 and set user, password, organization and database. Get admin token
+
+
