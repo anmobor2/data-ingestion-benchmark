@@ -64,3 +64,14 @@ Add aws credentials
 Start verne with docker
 
     docker run -p 1884:1883 --env-file=deployment/docker/verne.env -h vmq0.local  --platform linux/amd64  vernemq/vernemq
+
+Start influxdb
+
+    mkdir influx-data
+    docker run \
+        --name influxdb \
+        -p 8086:8086 \
+        --volume $PWD/influx-data:/var/lib/influxdb2 \
+        influxdb:2.0.9
+
+    Goto localhost:8086 and set user, password, organization and database. Get admin token

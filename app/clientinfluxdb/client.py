@@ -4,9 +4,9 @@ import click
 from datetime import datetime, timedelta
 import random
 
-bucket = "telemetry"
+bucket = "energydata"
 org = "circutor"
-token = "xIBmBP8B0thtODu4h_ky4t2I3pQpo9LHpEwWY5aqnbVgn-YXuzFkn-uDJpJYJQdlJWc4YlHm_KLO55k0UiaULw=="
+token = "k3TMVP_NnTnMH-NTEwNehH8CzYkzPoshZNUqPQ1SLM8PxA8e-SePmItW-d_wIadXtCNNgMG-weAWOIYlBZNUzw=="
 # Store the URL of your InfluxDB instance
 url="http://localhost:8086"
 
