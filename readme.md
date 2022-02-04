@@ -64,3 +64,7 @@ Add aws credentials
 Start verne with docker
 
     docker run -p 1884:1883 --env-file=deployment/docker/verne.env -h vmq0.local  --platform linux/amd64  vernemq/vernemq
+
+Start verne2promscale without docker or kubernetes, directly with python as api rest using uvicorn in port 8889
+
+    uvicorn app.verne2promscale.main:app  --host 0.0.0.0 --port 8889
