@@ -1,5 +1,5 @@
 from datetime import datetime
-from app.lib.prometheus import (
+from app.lib.prometheus_pb2 import (
     TimeSeries,
     Label,
     Labels,
@@ -16,7 +16,10 @@ def dt2ts(dt):
     """Converts a datetime object to UTC timestamp
   naive datetime will be considered UTC.
   """
-    return calendar.timegm(dt.utctimetuple())
+    "2022-01-27T222500"
+    dt = dt[0:13] + ":" + dt[13:15]+ ":" + dt[15:17]
+    date_time_obj = datetime. strptime(dt, '%Y-%m-%dT%H:%M:%S')
+    return calendar.timegm(date_time_obj.utctimetuple())
 
 
 def write(url, ts, value, metric, labels):
