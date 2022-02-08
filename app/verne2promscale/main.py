@@ -67,7 +67,11 @@ async def on_publish(request: Request):
     
     print(url, ts, value, metrics, labels)
     for metric,value in metrics.items():
-        remotewrite.write(url, ts, value, metric, labels)
+        type(ts)
+        dt = ts[0:13] + ":" + ts[13:15]+ ":" + ts[15:17]
+
+        ts2 = datetime.strptime(dt, '%Y-%m-%dT%H:%M:%S')
+        remotewrite.write(url, ts2, value, metric, labels)
     
 #    host.docker.internal
 

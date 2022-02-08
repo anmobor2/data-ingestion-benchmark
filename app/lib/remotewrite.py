@@ -16,10 +16,7 @@ def dt2ts(dt):
     """Converts a datetime object to UTC timestamp
   naive datetime will be considered UTC.
   """
-    "2022-01-27T222500"
-    dt = dt[0:13] + ":" + dt[13:15]+ ":" + dt[15:17]
-    date_time_obj = datetime. strptime(dt, '%Y-%m-%dT%H:%M:%S')
-    return calendar.timegm(date_time_obj.utctimetuple())
+    return calendar.timegm(dt.utctimetuple())
 
 
 def write(url, ts, value, metric, labels):
