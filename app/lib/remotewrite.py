@@ -49,11 +49,7 @@ def write(url, ts, value, metric, labels):
         "X-Prometheus-Remote-Write-Version": "0.1.0",
         "User-Agent": "metrics-worker"
     }
-    try:
-        response = requests.post(url, headers=headers, data=compressed)
-        print(response)
-    except Exception as e:
-        print(e)
+    return requests.post(url, headers=headers, data=compressed)
 
 if __name__ == "__main__":
     write("http://host.docker.internal:9090/api/v1/write", datetime.utcnow(), random.randint(210, 230), "voltage", {"device": "wola", "deviceType": "raption"})
