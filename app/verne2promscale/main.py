@@ -50,8 +50,6 @@ async def on_publish(request: Request):
     body = await request.json()
     print(body) # Esto saca por la consola en contenido del json
     # que lee python -m app.s3mqtt.main --filename=samples/20220121T114400.json
- 
-    print("Value of 'HOME' environment variable :", REMOTE_WRITE) 
 
     #arrives coded, he the body is decoded 
     json_object = json.loads(base64.b64decode(body['payload']))
