@@ -14,8 +14,10 @@ def run(host, port, token, filename):
     with open(filename, 'r') as f:
         body = f.read()
         print(body)
-        r = client.publish("/telemetry", payload=f.read())
-        print(r)
+        print("DENTRO DE S3 a MQTT RUN")
+#        r = client.publish("/me/telemetry", payload=f.read())
+        r = client.publish("/me/telemetry", payload=body)
+        print("RESULTADO LLAMADA VERNE",r)
     client.disconnect()
 
 if __name__ == "__main__":
