@@ -2,6 +2,10 @@ import psycopg2
 from  psycopg2.extras import DictCursor
 from sshtunnel import SSHTunnelForwarder
 import click
+from app.lib import remotewrite
+from datetime import datetime, timedelta
+import time
+
 
 # https://gist.github.com/deehzee/53c8708417312e5deb32c58b73dca7a5
 
@@ -14,7 +18,7 @@ variables = [
     "cosPhiDaily", "cosPhiWeekly"
 ]
 
-labels_cache = {}
+LABELS_CACHE = {}
 
 def get_labels(cur, device_id):
     labels = {}
@@ -31,8 +35,36 @@ def run_sql(cur, sql):
     return r
 
 
+def write_json(data, prometheus_url):
+    for var, value in data['values'].items():
+        remotewrite.write(prometheus_url, data["ts"], value, var, data["tags"])
+
+def build_sql(day, variables):
+    sql = """select 
+                   to_timestamp(values.ts / 1000) as ts, values.entity_id as device_id, \n"""
+    for var in variables:
+        sql = sql + "MAX(CASE WHEN vars.key = '{var}' THEN values.{field} END) AS {var}, \n".format(var=var,
+                                                                                                    field='long_v')
+    sql = sql + """count(*) as num_vars 
+                   FROM public.ts_kv as values 
+                   LEFT JOIN public.ts_kv_dictionary as vars on values.key = vars.key_id 
+                   WHERE to_timestamp(values.ts / 1000)::date = '{day}'
+                   GROUP BY (values.ts, values.entity_id)
+                   """.format(day=day)
+    return sql
+
+def row_to_json(row, cur):
+    if row['device_id'] not in LABELS_CACHE:
+        LABELS_CACHE[row['device_id']] = get_labels(cur, row['device_id'])
+    values = {k: v for k, v in row.items() if v and k not in ["ts", "device_id", "num_vars"] is not None}
+    data = {"ts": row["ts"], "device_id": row["device_id"], 'values': values, 'tags': LABELS_CACHE[row['device_id']]}
+    return data
+
 @click.command()
-def run():
+@click.option('--prometheus-url', default="", help='Prometheus url')
+@click.option('--start', default="", help='start day')
+@click.option('--end', default="", help='end day (not included)')
+def run(prometheus_url, start, end):
     # Alternatively use contexts...
     with SSHTunnelForwarder(
             ('54.171.211.53', 22),
@@ -49,30 +81,20 @@ def run():
                 port=tunnel.local_bind_port
         ) as connect:
             cur = connect.cursor(cursor_factory=DictCursor)
+            day = datetime.strptime(start, "%Y-%m-%d")
 
-            sql = """select 
-                to_timestamp(values.ts / 1000) as ts, values.entity_id as device_id, \n"""
-            for var in variables:
-                sql = sql + "MAX(CASE WHEN vars.key = '{var}' THEN values.{field} END) AS {var}, \n".format(var=var,
-                                                                                                         field='long_v')
-            sql = sql + """count(*) as num_vars 
-                FROM public.ts_kv as values 
-                LEFT JOIN public.ts_kv_dictionary as vars on values.key = vars.key_id 
-                WHERE to_timestamp(values.ts / 1000)::date = '{day}'
-                GROUP BY (values.ts, values.entity_id)
-                """.format(day='2022-02-05')
-
-            print(sql)
-            cur.execute(sql)
-            num_rows = cur.rowcount
-            for row in cur.fetchall():
-                print(row)
-                if row['device_id'] not in labels_cache:
-                    labels_cache[row['device_id']] = get_labels(cur, row['device_id'])
-                values = {k: v for k, v in row.items() if v and k not in ["ts", "device_id", "num_vars"] is not None}
-                data = {"ts": row["ts"], "device_id": row["device_id"], 'values': values,  'tags': labels_cache[row['device_id']]}
-                print(data)
-            print('Total rows', num_rows)
+            while day < datetime.strptime(end, "%Y-%m-%d"):
+                epoch = time.time()
+                print('Getting', day)
+                sql = build_sql(day.strftime("%Y-%m-%d"), variables)
+                #print(sql)
+                cur.execute(sql)
+                num_rows = cur.rowcount
+                for row in cur.fetchall():
+                    data = row_to_json(row, cur)
+                    write_json(data, prometheus_url)
+                print('Total rows', num_rows, 'in', time.time() - epoch, 's')
+                day = day + timedelta(days=1)
 
 if __name__ == "__main__":
     run()
