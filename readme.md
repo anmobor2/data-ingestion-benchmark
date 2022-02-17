@@ -90,3 +90,10 @@ Get data from Thingsboard to S3
         --start=2022-02-01 --end=2022-02-02
 
 
+Start Victoria Metrics
+
+    docker run -it --rm -v $PWD/victoria-metrics-data:/victoria-metrics-data -p 8428:8428 victoriametrics/victoria-metrics
+
+Send data to Victoria Metrics
+
+    python3 -m app.s3todb.prometheus --bucket=XXX --prefix=/ --prometheus-url=http://<victoriametrics-addr>:8428/api/v1/write
