@@ -5,7 +5,12 @@ import click
 from app.lib import remotewrite
 from datetime import datetime, timedelta
 import time
-
+from urllib.parse import urlparse
+import io
+import boto3
+import json
+import os
+from pathlib import Path
 
 # https://gist.github.com/deehzee/53c8708417312e5deb32c58b73dca7a5
 
@@ -19,6 +24,9 @@ variables = [
 ]
 
 LABELS_CACHE = {}
+
+s3 = boto3.client('s3')
+
 
 def get_labels(cur, device_id):
     labels = {}
@@ -60,26 +68,56 @@ def row_to_json(row, cur):
     data = {"ts": row["ts"], "device_id": row["device_id"], 'values': values, 'tags': LABELS_CACHE[row['device_id']]}
     return data
 
+def json_serial(obj):
+    """JSON serializer for objects not serializable by default json code"""
+
+    if isinstance(obj, (datetime)):
+        return obj.strftime("%Y-%m-%dT%H:%M:%S")
+    raise TypeError ("Type %s not serializable" % type(obj))
+
+def save_s3(data, bucket):
+    buff = io.StringIO()
+    buff.write(json.dumps(data, default=json_serial))
+    filename = "tbdata/{device}/{ts}.json".format(device=data["device_id"], ts=data["ts"].strftime("%Y-%m-%dT%H:%M:%S"))
+    s3.upload_fileobj(
+        io.BytesIO(buff.getvalue().encode()),
+        bucket,
+        filename
+    )
+    print('STORED FILE as ', filename, 'IN', bucket)
+
+def save_local(data, path):
+    filename = "{path}/{device}/{ts}.json".format(path=path, device=data["device_id"], ts=data["ts"].strftime("%Y-%m-%dT%H:%M:%S"))
+    Path("{path}/{device}".format(path=path, device=data["device_id"])).mkdir(parents=True, exist_ok=True)
+    with open(filename, 'w') as f:
+        f.write(json.dumps(data, default=json_serial))
+    print('STORED FILE as ', filename)
+
 @click.command()
-@click.option('--prometheus-url', default="", help='Prometheus url')
+@click.option('--prometheus-url', default=None, help='Prometheus url')
 @click.option('--start', default="", help='start day')
 @click.option('--end', default="", help='end day (not included)')
-def run(prometheus_url, start, end):
+@click.option('--postgres', default="", help='Postgres URI')
+@click.option('--bucket', default=None, help='S3 Bucket')
+@click.option('--path', default=None, help='Path to store data locally')
+@click.option('--bastion-host', default="", help='Bastion Host')
+@click.option('--bastion-user', default="", help='Bastion User')
+@click.option('--bastion-key', default="", help='Bastion Key')
+def run(prometheus_url, start, end, postgres, bucket, bastion_host, bastion_user, bastion_key, path):
+    local_port = 6543
+    uri = urlparse(postgres)
+
     # Alternatively use contexts...
     with SSHTunnelForwarder(
-            ('54.171.211.53', 22),
-            ssh_username='ec2-user',
-            ssh_private_key='~/cluster-bastion.pem',
-            remote_bind_address=('tsdb-27c921-circutor-f875.a.timescaledb.io', 19637),
-            local_bind_address=('localhost', 6543),  # could be any available port
+            (bastion_host, 22),
+            ssh_username=bastion_user,
+            ssh_private_key=bastion_key,
+            remote_bind_address=(uri.hostname, uri.port) #,
+            #local_bind_address=('localhost', local_port),  # could be any available port
     ) as tunnel:
-        with psycopg2.connect(
-                user='tsdbadmin',
-                password='ft12bvwiplkkt45u',
-                database='production',
-                host=tunnel.local_bind_host,
-                port=tunnel.local_bind_port
-        ) as connect:
+        local_uri = postgres.replace(uri.hostname, tunnel.local_bind_host).replace(str(uri.port), str(tunnel.local_bind_port))
+        print(local_uri)
+        with psycopg2.connect(local_uri) as connect:
             cur = connect.cursor(cursor_factory=DictCursor)
             day = datetime.strptime(start, "%Y-%m-%d")
 
@@ -92,7 +130,15 @@ def run(prometheus_url, start, end):
                 num_rows = cur.rowcount
                 for row in cur.fetchall():
                     data = row_to_json(row, cur)
-                    write_json(data, prometheus_url)
+                    #print(data)
+                    if len(data["values"]) > 0:
+                        if bucket:
+                            save_s3(data, bucket)
+                        if path:
+                            save_local(data, path)
+                        if prometheus_url:
+                            write_json(data, prometheus_url)
+
                 print('Total rows', num_rows, 'in', time.time() - epoch, 's')
                 day = day + timedelta(days=1)
 
