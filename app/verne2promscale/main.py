@@ -63,7 +63,7 @@ async def on_publish(request: Request):
     metrics = json_object["values"] #for each attribute call
     # remote write
     
-    print(url, ts, value, metrics, labels)
+    print(url, ts, value, metrics, "labels:", labels)
     for metric,value in metrics.items():
         type(ts)
         dt = ts[0:13] + ":" + ts[13:15]+ ":" + ts[15:17]
