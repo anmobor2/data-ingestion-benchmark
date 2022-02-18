@@ -9,3 +9,5 @@ boto3==1.20.40
 schedule==1.1.0
 paho-mqtt==1.6.1
 influxdb-client==1.25.0
+sshtunnel==0.4.0
+psycopg==3.0.8

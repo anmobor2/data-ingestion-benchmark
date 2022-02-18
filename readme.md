@@ -82,6 +82,14 @@ Start influxdb
     Goto localhost:8086 and set user, password, organization and database. Get admin token
 
 
+Get data from Thingsboard to S3
+
+    python3 -m app.tbtos3.main \
+        --bastion-host=54.171.211.53 --bastion-user=ec2-user --bastion-key=~/cluster-bastion.pem \
+        --postgres="postgresql://tsdbadmin:XXXXXX@tsdb-27c921-circutor-f875.a.timescaledb.io:19637/production" \
+        --start=2022-02-01 --end=2022-02-02
+
+
 Start Victoria Metrics
 
     docker run -it --rm -v $PWD/victoria-metrics-data:/victoria-metrics-data -p 8428:8428 victoriametrics/victoria-metrics
