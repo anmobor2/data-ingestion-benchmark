@@ -14,3 +14,8 @@ psrecorder.env
 
 # prometheus data folder
 data
+.env/bin
+.env/bin/python3
+.env/lib/python3.8/site-packages
+.env/lib64
+.env/share
