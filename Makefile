@@ -90,3 +90,6 @@ verne2prom-restart:
 
 promscale-status:
 	kubectl get pods -o wide --watch
+
+timescale-apply:
+	kubectl apply -f deployment/k8s/base/timescale/timescale.yaml
