@@ -10,11 +10,12 @@ import pytz
 from psycopg2.extras import RealDictCursor
 from datetime import datetime, timezone
 
-uri = "postgres://postgres:admin@localhost:5432/postgres"
+uri = "postgres://postgres:admin@127.0.0.1:5432/postgres"
 db_conn = psycopg2.connect(uri)
 c = db_conn.cursor(cursor_factory=RealDictCursor)
 #c.execute("SELECT 1 = 1")
 #result = c.fetchone()
+#print(result)
 
 def keys(bucket_name, prefix='/', delimiter='/'):
     prefix = prefix[1:] if prefix.startswith(delimiter) else prefix
