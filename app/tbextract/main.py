@@ -125,7 +125,7 @@ def run(prometheus_url, start, end, postgres, bucket, bastion_host, bastion_user
                 epoch = time.time()
                 print('Getting', day)
                 sql = build_sql(day.strftime("%Y-%m-%d"), variables)
-                #print(sql)
+                print(sql)
                 cur.execute(sql)
                 num_rows = cur.rowcount
                 for row in cur.fetchall():
