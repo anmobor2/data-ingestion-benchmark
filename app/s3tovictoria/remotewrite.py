@@ -1,11 +1,5 @@
 from datetime import datetime
-from app.lib.prometheus import (
-    TimeSeries,
-    Label,
-    Labels,
-    Sample,
-    WriteRequest
-)
+
 import calendar
 import logging
 import requests
@@ -20,6 +14,7 @@ def dt2ts(dt):
 
 
 def write(url, ts, value, metric, labels):
+    from app.lib.prometheus import WriteRequest
     write_request = WriteRequest()
 
     series = write_request.timeseries.add()
@@ -46,7 +41,7 @@ def write(url, ts, value, metric, labels):
     headers = {
         "Content-Encoding": "snappy",
         "Content-Type": "application/x-protobuf",
-        "X-Prometheus-Remote-Write-Version": "0.1.0",
+        "X-victoriametrics-Remote-Write-Version": "0.1.0",
         "User-Agent": "metrics-worker"
     }
     return requests.post(url, headers=headers, data=compressed)

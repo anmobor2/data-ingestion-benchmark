@@ -3,8 +3,9 @@ import boto3
 import json
 import time
 from io import StringIO, BytesIO
-import remotewrite
-from datetime import datetime
+from datetime import datetime, timezone
+
+from app.s3tovictoria import remotewrite
 
 
 def keys(bucket_name, prefix='/', delimiter='/'):
@@ -27,7 +28,10 @@ def run(s3bucket, prefix, victoriam_url):
         s3.download_fileobj(s3bucket, item, buf)
         json_object = json.loads(buf.getvalue().decode("utf-8"))
         download_time = time.time() - epoch
-        ts = datetime.strptime(json_object["ts"], "%Y-%m-%dT%H%M%S")
+#        ts = datetime.strptime(json_object["ts"], "%Y-%m-%dT%H%M%S")
+        dtime = str(datetime.now(timezone.utc))
+        dt = dtime[0:10] + "T" + dtime[11:19]
+        ts = datetime.strptime(dt, '%Y-%m-%dT%H:%M:%S')
         for var, value in json_object['values'].items():
             if var in filter:
                 remotewrite.write(victoriam_url, ts, value, var, json_object["tags"])
