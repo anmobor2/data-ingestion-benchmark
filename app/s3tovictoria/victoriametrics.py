@@ -14,7 +14,7 @@ def keys(bucket_name, prefix='/', delimiter='/'):
     return (_.key for _ in bucket.objects.filter(Prefix=prefix))
 
 @click.command()
-@click.option('--s3bucket', default="myc-ingestion-sample-recorded-data", help='S3 to get data from')
+                                                                                                                                                                                                                                                                                                                                                                                                                                                    @click.option('--s3bucket', default="myc-ingestion-sample-recorded-data", help='S3 to get data from')
 @click.option('--prefix', default="/tbdata/000e00b0-82b2-11ec-9949-7f0fdad2c99c/", help='S3 prefix')
 @click.option('--victoriam_url', default="http://localhost:8428/write")
 def run(s3bucket, prefix, victoriam_url):

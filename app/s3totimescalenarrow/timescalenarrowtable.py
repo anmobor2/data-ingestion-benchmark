@@ -5,37 +5,18 @@ from psycopg2.extras import RealDictCursor
 import boto3
 from io import BytesIO
 
+#uri="postgres://postgres:admin@127.0.0.1:5432/postgres"
 def keys(bucket_name, prefix='/', delimiter='/'):
     prefix = prefix[1:] if prefix.startswith(delimiter) else prefix
     bucket = boto3.resource('s3').Bucket(bucket_name)
     return (_.key for _ in bucket.objects.filter(Prefix=prefix))
 
 
-def data_to_sql(raw_data):
-    data = json.loads(raw_data)
-
-    fields = ["device_id", "time"]
-    values = ["'" + data["device_id"] + "'", "'" + data["ts"] + "'"]
-    print(fields)
-
-    for key, value in data["values"].items():
-        fields.append(key)
-        values.append(str(value))
-        print(key, value)
-
-    print(values)
-
-    sql = "INSERT INTO metric_data ({fields}) VALUES({values})".format(
-        fields=",".join(fields),
-        values=",".join(values)
-    )
-
-    return data["device_id"], data["tags"], sql
-
-
 def insert_file(cursor, obj):
-    device_id, tags, sql = data_to_sql(obj)
-    print(sql)
+
+    data = json.loads(obj)
+    device_id = data["device_id"]
+    tags = data["tags"]
 
     cursor.execute("SELECT count(*) as num FROM devices where id = '{device_id}'".format(device_id=device_id))
     r = cursor.fetchone()
@@ -43,8 +24,17 @@ def insert_file(cursor, obj):
         sql_device = "INSERT INTO devices (id, tags) VALUES('{id}', '{tags}')".format(id=device_id, tags=json.dumps(tags))
         cursor.execute(sql_device)
 
-    cursor.execute(sql)
-
+    for key, value in data["values"].items():
+        fields = ["device_id", "time", "metric", "value"]
+        values = ["'" + data["device_id"] + "'", "'" + data["ts"] + "'"]
+        values.append("'" + str(key) + "'")
+        values.append(str(value))
+        print(key, value)
+        sql = "INSERT INTO metric_data_narrow ({fields}) VALUES({values})".format(
+            fields=",".join(fields),
+            values=",".join(values)
+        )
+        cursor.execute(sql)
 
 @click.command()
 @click.option('--s3bucket', default=None, help='S3 to get data from')
