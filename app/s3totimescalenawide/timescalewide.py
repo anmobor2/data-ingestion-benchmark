@@ -5,18 +5,38 @@ from psycopg2.extras import RealDictCursor
 import boto3
 from io import BytesIO
 
-
-# uri="postgres://postgres:admin@127.0.0.1:5432/postgres"
 def keys(bucket_name, prefix='/', delimiter='/'):
     prefix = prefix[1:] if prefix.startswith(delimiter) else prefix
     bucket = boto3.resource('s3').Bucket(bucket_name)
     return (_.key for _ in bucket.objects.filter(Prefix=prefix))
 
 
+def data_to_sql(raw_data):
+    data = json.loads(raw_data)
+
+    fields = ["device_id", "time"]
+    values = ["'" + data["device_id"] + "'", "'" + data["ts"] + "'"]
+    print(fields)
+
+    for key, value in data["values"].items():
+        fields.append(key)
+        values.append(str(value))
+        print(key, value)
+
+    print(values)
+
+    sql = "INSERT INTO metric_data ({fields}) VALUES({values})".format(
+        fields=",".join(fields),
+        values=",".join(values)
+    )
+
+    return data["device_id"], data["tags"], sql
+
+
 def insert_file(cursor, obj, filedevices=None):
-    data = json.loads(obj)
-    device_id = data["device_id"]
-    tags = data["tags"]
+    device_id, tags, sql = data_to_sql(obj)
+
+    print(sql)
 
     if filedevices:
         for line in filedevices:
@@ -26,19 +46,10 @@ def insert_file(cursor, obj, filedevices=None):
                 cursor.execute("SELECT count(*) as num FROM devices where id = '{device_id}'".format(device_id=device_id))
                 r = cursor.fetchone()
                 if r["num"] == 0:
-                    sql_device = "INSERT INTO devices (id, tags) VALUES('{id}', '{tags}')".format(id=device_id,
-                                                                                                  tags=json.dumps(tags))
+                    sql_device = "INSERT INTO devices (id, tags) VALUES('{id}', '{tags}')".format(id=device_id, tags=json.dumps(tags))
                     cursor.execute(sql_device)
 
-                for key, value in data["values"].items():
-                    fields = ["device_id", "time", "metric", "value"]
-                    values = ["'" + data["device_id"] + "'", "'" + data["ts"] + "'", "'" + str(key) + "'", str(value)]
-                    print(key, value)
-                    sql = "INSERT INTO metric_data_narrow ({fields}) VALUES({values})".format(
-                        fields=",".join(fields),
-                        values=",".join(values)
-                    )
-                    cursor.execute(sql)
+                cursor.execute(sql)
 
 
 @click.command()
