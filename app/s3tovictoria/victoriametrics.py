@@ -38,7 +38,7 @@ def frombucket(s3bucket, prefix, victoriam_url, devicesfile):
                         total = total + 1
                         print(item, 'total:', total_time, 'download:', download_time, 'write:', write_time)
 
-    if total == 0
+    if total == 0:
         print("DEVICE ID NOT FOUND IN DEVICES FILE 0 PROCESSED")
 
 def fromfile(filename, devicesfile, victoriam_url):
