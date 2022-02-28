@@ -28,6 +28,7 @@ def frombucket(s3bucket, prefix, victoriam_url, devicesfile):
                     device = line.replace('\n', '')
                     print(device.rstrip())
                     if device == device_id:
+                        print("Device == Device")
                         for var, value in json_object['values'].items():
                             if var in filter:
                                 remotewrite.write(victoriam_url, ts, value, var, json_object["tags"])
@@ -37,7 +38,8 @@ def frombucket(s3bucket, prefix, victoriam_url, devicesfile):
                         total = total + 1
                         print(item, 'total:', total_time, 'download:', download_time, 'write:', write_time)
 
-    print(total)
+    if total == 0
+        print("DEVICE ID NOT FOUND IN DEVICES FILE 0 PROCESSED")
 
 def fromfile(filename, devicesfile, victoriam_url):
     if filename:

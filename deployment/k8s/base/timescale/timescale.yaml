@@ -4,7 +4,7 @@ kind: PersistentVolumeClaim
 metadata:
   name: timescale-pv-claim
   labels:
-    app: wordpress
+    app: timescale
 spec:
   accessModes:
     - ReadWriteOnce
