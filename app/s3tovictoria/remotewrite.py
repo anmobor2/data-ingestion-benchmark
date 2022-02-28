@@ -14,7 +14,7 @@ def dt2ts(dt):
 
 
 def write(url, ts, value, metric, labels):
-    from app.lib.prometheus import WriteRequest
+    from app.lib.prometheus_pb2 import WriteRequest
     write_request = WriteRequest()
 
     series = write_request.timeseries.add()
