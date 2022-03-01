@@ -109,7 +109,7 @@ Run timescalewide and timescalenarrow
     python -m app.s3totimescalewide.main
 
     with a bucket s3 and prefix and devices list file:
-    python -m app.s3totimescalenarrow.main  --uri="postgres://postgres:admin@127.0.0.1:5434/postgres" --devicesfile=/home/anmoreno/NEWPLATFORM/data_ingestion/data-ingestion-benchmark/samples/devicesfile.txt --prefix=/tbdata/000e00b0-82b2-11ec-9949-7f0fdad2c99c/ --s3bucket=myc-ingestion-sample-recorded-data
+    python -m app.s3totimescalenarrow.main  --uri="postgres://postgres:admin@127.0.0.1:5434/postgres" --devicesfile=/home/anmoreno/NEWPLATFORM/data_ingestion/data-ingestion-benchmark/samples/devicesfile.txt --prefix=/tbdata-day/9d5eaae0-421b-11ec-9949-7f0fdad2c99c/2022-02-24 --s3bucket=myc-ingestion-sample-recorded-data
 
     same for wide:
     python -m app.s3totimescalewide.main
