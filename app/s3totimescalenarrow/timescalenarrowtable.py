@@ -70,7 +70,9 @@ def run(s3bucket, prefix, filename, uri, devicesfile):
                     buf = BytesIO()
 
                     s3.download_fileobj(s3bucket, item, buf)
-                    insert_file(cursor, buf.getvalue().decode("utf-8"), filedevices)
+                    data = buf.getvalue().decode("utf-8").splitlines()
+                    for row in data:
+                        insert_file(cursor, row, filedevices)
                     db_conn.commit()
 
 
