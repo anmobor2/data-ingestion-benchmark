@@ -97,3 +97,19 @@ Start Victoria Metrics
 Send data to Victoria Metrics
 
     python3 -m app.s3todb.prometheus --bucket=XXX --prefix=/ --prometheus-url=http://<victoriametrics-addr>:8428/api/v1/write
+
+Run timescalewide and timescalenarrow
+
+    You can run both with a file as a parameter with all the telemetries inside that file or with a Bucket S3 and Prefix as parameters, also there is a file with the valid id devices list, only the devices inside that file will be processed and the connection uri to timescale. 
+
+    With a file as parameter and the devices list file:
+    python -m app.s3totimescalenarrow.main --filename=/home/anmoreno/NEWPLATFORM/data_ingestion/data-ingestion-benchmark/samples/2021-11-01T00_02_01.json --uri="postgres://postgres:admin@127.0.0.1:5434/postgres" --devicesfile=/home/anmoreno/NEWPLATFORM/data_ingestion/data-ingestion-benchmark/samples/devicesfile.txt
+
+    same for wide:
+    python -m app.s3totimescalewide.main
+
+    with a bucket s3 and prefix and devices list file:
+    python -m app.s3totimescalenarrow.main  --uri="postgres://postgres:admin@127.0.0.1:5434/postgres" --devicesfile=/home/anmoreno/NEWPLATFORM/data_ingestion/data-ingestion-benchmark/samples/devicesfile.txt --prefix=/tbdata/000e00b0-82b2-11ec-9949-7f0fdad2c99c/ --s3bucket=myc-ingestion-sample-recorded-data
+
+    same for wide:
+    python -m app.s3totimescalewide.main
