@@ -114,6 +114,23 @@ Run timescalewide and timescalenarrow
     same for wide:
     python -m app.s3totimescalewide.main
 
+### Simple query examples in Grafana for timescale
+
+    SELECT 
+    time AS "time",
+    ph_con_tot AS metric
+    FROM public.metric_data
+    WHERE
+    $__timeFilter(time)
+    ORDER BY 1,2
+
+    SELECT
+    time AS "time",
+    metric AS "metric", value
+    FROM public.metric_data_narrow
+    WHERE
+    $__timeFilter(time)
+    ORDER BY 1
 
 ### Import data for database benchmark
 
