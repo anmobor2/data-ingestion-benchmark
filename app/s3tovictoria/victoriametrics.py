@@ -41,6 +41,31 @@ def frombucket(s3bucket, prefix, victoriam_url, devicesfile):
     if total == 0:
         print("DEVICE ID NOT FOUND IN DEVICES FILE 0 PROCESSED")
 
+
+def frombucketnofilter(s3bucket, prefix, victoriam_url):
+    s3 = boto3.client('s3')
+    files = keys(s3bucket, prefix)
+    total = 0
+    for item in files:
+        epoch = time.time()
+        buf = BytesIO()
+        s3.download_fileobj(s3bucket, item, buf)
+        download_time = time.time() - epoch
+        data = buf.getvalue().decode("utf-8").splitlines()
+
+        for row in data:
+            json_object = json.loads(row)
+            ts = datetime.strptime(json_object["ts"], "%Y-%m-%dT%H:%M:%S")
+            for var, value in json_object['values'].items():
+                remotewrite.write(victoriam_url, ts, value, var, json_object["tags"])
+
+            total = total + 1
+        total_time = time.time() - epoch
+        write_time = total_time - download_time
+
+        print(item, 'total:', total_time, 'download:', download_time, 'write:', write_time)
+
+
 def fromfile(filename, devicesfile, victoriam_url):
     if filename:
         with open(filename, 'r') as f:
@@ -71,11 +96,13 @@ def keys(bucket_name, prefix='/', delimiter='/'):
 @click.option('--prefix', default=None, help='S3 prefix')
 @click.option('--filename', default=None)
 @click.option('--devicesfile', default=None)
-@click.option('--victoriam_url', default="http://localhost:8428/write")
+@click.option('--victoriam_url', default="http://localhost:8428/api/v1/write")
 def run(s3bucket, prefix, victoriam_url, filename, devicesfile):
 
-    if prefix and s3bucket and devicesfile and victoriam_url:
-        frombucket(s3bucket, prefix, victoriam_url, devicesfile)
+    if prefix and s3bucket and victoriam_url:
+        #frombucket(s3bucket, prefix, victoriam_url, devicesfile)
+        print('loading data from s3')
+        frombucketnofilter(s3bucket, prefix, victoriam_url)
 
     if filename and devicesfile and victoriam_url:
         fromfile(filename, devicesfile, victoriam_url)

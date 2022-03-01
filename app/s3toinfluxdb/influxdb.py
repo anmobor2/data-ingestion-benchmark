@@ -5,13 +5,13 @@ from io import StringIO, BytesIO
 import influxdb_client
 from influxdb_client.client.write_api import SYNCHRONOUS, WriteOptions, ASYNCHRONOUS
 filter = ["AE", "AI1", "AI2", "AI3", "API1", "API2", "API3", "API", "CE", "IE", "IPI1", "IPI2", "IPI3", "PFI1", "PFI2", "PFI3", "VAI", "VI1", "VI2", "VI3"]
-
+import time
 #s3_paginator = boto3.client('s3').get_paginator('list_objects_v2')
+from datetime import datetime
 
-
-idb_bucket = "energydata"
+idb_bucket = "thingsboard"
 org = "circutor"
-token = "k3TMVP_NnTnMH-NTEwNehH8CzYkzPoshZNUqPQ1SLM8PxA8e-SePmItW-d_wIadXtCNNgMG-weAWOIYlBZNUzw=="
+TOKEN = "eDXVGwuHS2BtHLkfx46874s687s"
 # Store the URL of your InfluxDB instance
 url="http://localhost:8086"
 
@@ -52,6 +52,39 @@ def frombucket(s3bucket, prefix, devicesfile, client, write_api):
         total = total + 1
     print(total)
 
+
+def frombucketnofilter(s3bucket, prefix, client, write_api):
+    s3 = boto3.client('s3')
+    files = keys(s3bucket, prefix)
+    total = 0
+    for item in files:
+        epoch = time.time()
+        buf = BytesIO()
+        s3.download_fileobj(s3bucket, item, buf)
+        download_time = time.time() - epoch
+        data = buf.getvalue().decode("utf-8").splitlines()
+
+        for row in data:
+            json_object = json.loads(row)
+            ts = datetime.strptime(json_object["ts"], "%Y-%m-%dT%H:%M:%S")
+            p = influxdb_client.Point("energy")
+
+            for tag, value in json_object['tags'].items():
+                p.tag(tag, value)
+
+            for var, value in json_object['values'].items():
+                p.field(var, value)
+                p.time(ts)
+
+            print(p)
+            write_api.write(bucket=idb_bucket, org=org, record=p)
+            total = total + 1
+        total_time = time.time() - epoch
+        write_time = total_time - download_time
+
+        print(item, 'total:', total_time, 'download:', download_time, 'write:', write_time)
+
+
 def fromfile(filename, devicesfile, client, write_api):
     if filename:
         with open(filename, 'r') as f:
@@ -86,14 +119,15 @@ def run(s3bucket, prefix, filename, devicesfile, url):
 
     client = influxdb_client.InfluxDBClient(
        url=url,
-#       token=token,
-#       org=org
+       token=TOKEN,
+       org="influxdata"
     )
 
     write_api = client.write_api(write_options=ASYNCHRONOUS)
 
-    if prefix and s3bucket and devicesfile:
-        frombucket(s3bucket, prefix, devicesfile, client, write_api)
+    if prefix and s3bucket:
+        #frombucket(s3bucket, prefix, devicesfile, client, write_api)
+        frombucketnofilter(s3bucket, prefix, client, write_api)
 
     if filename and devicesfile:
         fromfile(filename, devicesfile, client, write_api)

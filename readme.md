@@ -84,10 +84,10 @@ Start influxdb
 
 Get data from Thingsboard to S3
 
-    python3 -m app.tbtos3.main \
+    python3 -m app.tbextract.main \
         --bastion-host=54.171.211.53 --bastion-user=ec2-user --bastion-key=~/cluster-bastion.pem \
         --postgres="postgresql://tsdbadmin:XXXXXX@tsdb-27c921-circutor-f875.a.timescaledb.io:19637/production" \
-        --start=2022-02-01 --end=2022-02-02
+        --start=2022-02-01 --end=2022-02-02 --device-filter-file=samples/devicesfile.txt --bucket
 
 
 Start Victoria Metrics
@@ -113,3 +113,16 @@ Run timescalewide and timescalenarrow
 
     same for wide:
     python -m app.s3totimescalewide.main
+
+
+### Import data for database benchmark
+
+Victoria Metrics:
+
+    python3 -m app.s3tovictoria.main --prefix=/tbdata-day/9d5eaae0-421b-11ec-9949-7f0fdad2c99c/2022-02-24 --s3bucket=myc-ingestion-sample-recorded-data
+
+Influx DB:
+
+    # Setup influxdb
+    helm upgrade --install influxdb influxdata/influxdb2 -n data-ingestion --set adminUser.password=circutoradmin --set adminUser.token=eDXVGwuHS2BtHLkfx46874s687s --set persistence.size=5Gi
+    

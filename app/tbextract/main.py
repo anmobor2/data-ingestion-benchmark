@@ -47,18 +47,28 @@ def write_json(data, prometheus_url):
     for var, value in data['values'].items():
         remotewrite.write(prometheus_url, data["ts"], value, var, data["tags"])
 
-def build_sql(day, variables):
+def build_sql(day, variables, device_id):
     sql = """select 
                    to_timestamp(values.ts / 1000) as ts, values.entity_id as device_id, \n"""
     for var in variables:
         sql = sql + "MAX(CASE WHEN vars.key = '{var}' THEN values.{field} END) AS {var}, \n".format(var=var,
                                                                                                     field='long_v')
-    sql = sql + """count(*) as num_vars 
-                   FROM public.ts_kv as values 
-                   LEFT JOIN public.ts_kv_dictionary as vars on values.key = vars.key_id 
-                   WHERE to_timestamp(values.ts / 1000)::date = '{day}'
-                   GROUP BY (values.ts, values.entity_id)
-                   """.format(day=day)
+
+    if device_id:
+        sql = sql + """count(*) as num_vars 
+                       FROM public.ts_kv as values 
+                       LEFT JOIN public.ts_kv_dictionary as vars on values.key = vars.key_id 
+                       WHERE to_timestamp(values.ts / 1000)::date = '{day}' AND values.entity_id = '{device_id}' 
+                       GROUP BY (values.ts, values.entity_id)
+                       """.format(day=day, device_id=device_id)
+    else:
+        sql = sql + """count(*) as num_vars 
+                       FROM public.ts_kv as values 
+                       LEFT JOIN public.ts_kv_dictionary as vars on values.key = vars.key_id 
+                       WHERE to_timestamp(values.ts / 1000)::date = '{day}'
+                       GROUP BY (values.ts, values.entity_id)
+                       """.format(day=day)
+
     return sql
 
 def row_to_json(row, cur):
@@ -75,10 +85,11 @@ def json_serial(obj):
         return obj.strftime("%Y-%m-%dT%H:%M:%S")
     raise TypeError ("Type %s not serializable" % type(obj))
 
-def save_s3(data, bucket):
+def save_s3(data, bucket, device_id, day):
     buff = io.StringIO()
-    buff.write(json.dumps(data, default=json_serial))
-    filename = "tbdata/{device}/{ts}.json".format(device=data["device_id"], ts=data["ts"].strftime("%Y-%m-%dT%H:%M:%S"))
+    for row in data:
+        buff.write(json.dumps(row, default=json_serial) + "\n")
+    filename = "tbdata-day/{device}/{day}.json".format(device=device_id, day=day.strftime("%Y-%m-%d"))
     s3.upload_fileobj(
         io.BytesIO(buff.getvalue().encode()),
         bucket,
@@ -103,9 +114,15 @@ def save_local(data, path):
 @click.option('--bastion-host', default="", help='Bastion Host')
 @click.option('--bastion-user', default="", help='Bastion User')
 @click.option('--bastion-key', default="", help='Bastion Key')
-def run(prometheus_url, start, end, postgres, bucket, bastion_host, bastion_user, bastion_key, path):
+@click.option('--device-filter-file', default=None, help='device filter list')
+def run(prometheus_url, start, end, postgres, bucket, bastion_host, bastion_user, bastion_key, path, device_filter_file):
     local_port = 6543
     uri = urlparse(postgres)
+
+    device_filter = None
+    if device_filter_file:
+        with open(device_filter_file) as f:
+            device_filter = f.read().splitlines()
 
     # Alternatively use contexts...
     with SSHTunnelForwarder(
@@ -123,23 +140,23 @@ def run(prometheus_url, start, end, postgres, bucket, bastion_host, bastion_user
 
             while day < datetime.strptime(end, "%Y-%m-%d"):
                 epoch = time.time()
-                print('Getting', day)
-                sql = build_sql(day.strftime("%Y-%m-%d"), variables)
-                print(sql)
-                cur.execute(sql)
-                num_rows = cur.rowcount
-                for row in cur.fetchall():
-                    data = row_to_json(row, cur)
-                    #print(data)
-                    if len(data["values"]) > 0:
+                print('GETTING DAY: ', day)
+                for device_id in device_filter:
+                    sql = build_sql(day.strftime("%Y-%m-%d"), variables, device_id)
+                    #print(sql)
+                    cur.execute(sql)
+                    num_rows = cur.rowcount
+                    data = []
+                    for row in cur.fetchall():
+                        row_data = row_to_json(row, cur)
+                        if len(row_data["values"]) > 0:
+                            data.append(row_data)
+                    if len(data) > 0:
                         if bucket:
-                            save_s3(data, bucket)
-                        if path:
-                            save_local(data, path)
-                        if prometheus_url:
-                            write_json(data, prometheus_url)
-
-                print('Total rows', num_rows, 'in', time.time() - epoch, 's')
+                            save_s3(data, bucket, device_id, day)
+                        #if path:
+                        #    save_local(data, path)
+                    print('device', device_id, 'Total rows', num_rows,'with data', len(data), 'in', time.time() - epoch, 's')
                 day = day + timedelta(days=1)
 
 if __name__ == "__main__":
