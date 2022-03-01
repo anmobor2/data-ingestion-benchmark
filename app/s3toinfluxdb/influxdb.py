@@ -10,10 +10,10 @@ import time
 from datetime import datetime
 
 idb_bucket = "thingsboard"
-org = "circutor"
+ORGANIZATION = "influxdata"
 TOKEN = "eDXVGwuHS2BtHLkfx46874s687s"
 # Store the URL of your InfluxDB instance
-url="http://localhost:8086"
+url = "http://localhost:8086"
 
 
 def keys(bucket_name, prefix='/', delimiter='/'):
@@ -47,7 +47,7 @@ def frombucket(s3bucket, prefix, devicesfile, client, write_api):
                         for var, value in json_object['values'].items():
                             p.field(var, value)
                             p.time(json_object['ts'])
-                            write_api.write(bucket=idb_bucket, org=org, record=p)
+                            write_api.write(bucket=idb_bucket, org=ORGANIZATION, record=p)
 
         total = total + 1
     print(total)
@@ -77,7 +77,7 @@ def frombucketnofilter(s3bucket, prefix, client, write_api):
                 p.time(ts)
 
             print(p)
-            write_api.write(bucket=idb_bucket, org=org, record=p)
+            write_api.write(bucket=idb_bucket, org=ORGANIZATION, record=p)
             total = total + 1
         total_time = time.time() - epoch
         write_time = total_time - download_time
@@ -120,7 +120,6 @@ def run(s3bucket, prefix, filename, devicesfile, url):
     client = influxdb_client.InfluxDBClient(
        url=url,
        token=TOKEN,
-       org="influxdata"
     )
 
     write_api = client.write_api(write_options=ASYNCHRONOUS)
