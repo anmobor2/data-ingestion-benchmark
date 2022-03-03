@@ -82,7 +82,13 @@ def build_sql(day, device_id):
         sql = sql + "MAX(CASE WHEN vars.key = '{var}' THEN values.{field} END) AS {var}, \n".format(var=var,
                                                                                                     field='str_v')
     for var in variables_double:
-        sql = sql + "MAX(CASE WHEN vars.key = '{var}' THEN values.{field} END) AS {var}, \n".format(var=var,
+        if var == 'cosPhiDaily' or var == 'cosPhiWeekly':
+            dt = datetime.strptime(day, '%Y-%m-%d')
+            sql = sql + "MAX(CASE WHEN vars.key = '{var}' THEN (select  coalesce(Max(dbl_v), 0) + coalesce(Max(long_v), 0) from ts_kv where entity_id ='{device_id}'  and ts={day} ) END ) AS {var}, \n".format(var=var, field='dbl_v', device_id=device_id, day=time.mktime(dt.timetuple()))
+#        elif :
+#            sql = sql + "MAX(CASE WHEN vars.key = '{var}' THEN (select  coalesce(Max(dbl_v), 0) + coalesce(Max(long_v), 0) as value from ts_kv where entity_id ={device_id}  and date={day} ) as value END ) AS {var}, \n".format(var=var, field='dbl_v')
+        else:
+            sql = sql + "MAX(CASE WHEN vars.key = '{var}' THEN values.{field} END) AS {var}, \n".format(var=var,
                                                                                                     field='dbl_v')
 
     if device_id:
