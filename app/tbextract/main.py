@@ -43,6 +43,9 @@ variables_string = [
 ]
 
 variables_double = [
+    "OPERATING_HOURS", "PH_CON_TOT", "PH_GEN_TOT", "QH_Q1_TOT", "QH_Q2_TOT", "QH_Q3_TOT", "QH_Q4_TOT", "REPAIR_HOURS",
+    "OP_COUNT_STEP1", "OP_COUNT_STEP2", "OP_COUNT_STEP3", "OP_COUNT_STEP4", "OP_COUNT_STEP5", "OP_COUNT_STEP6",
+    "OP_COUNT_STEP7", "OP_COUNT_STEP8", "OP_COUNT_STEP9", "OP_COUNT_STEP10", "OP_COUNT_STEP11", "OP_COUNT_STEP12"
     "V_PP", "THDV_PP", "THDI", "cosPhiDaily", "cosPhiWeekly"
 ]
 
@@ -75,21 +78,13 @@ def write_json(data, prometheus_url):
 def build_sql(day, device_id):
     sql = """select 
                    to_timestamp(values.ts / 1000) as ts, values.entity_id as device_id, \n"""
-    for var in variables_long:
-        sql = sql + "MAX(CASE WHEN vars.key = '{var}' THEN values.{field} END) AS {var}, \n".format(var=var,
-                                                                                                    field='long_v')
+    #for var in variables_long:
+    #    sql = sql + "MAX(CASE WHEN vars.key = '{var}' THEN values.{field} END) AS {var}, \n".format(var=var, field='long_v')
     for var in variables_string:
-        sql = sql + "MAX(CASE WHEN vars.key = '{var}' THEN values.{field} END) AS {var}, \n".format(var=var,
-                                                                                                    field='str_v')
+        sql = sql + "MAX(CASE WHEN vars.key = '{var}' THEN values.{field} END) AS {var}, \n".format(var=var, field='str_v')
+
     for var in variables_double:
-        if var == 'cosPhiDaily' or var == 'cosPhiWeekly':
-            dt = datetime.strptime(day, '%Y-%m-%d')
-            sql = sql + "MAX(CASE WHEN vars.key = '{var}' THEN (select  coalesce(Max(dbl_v), 0) + coalesce(Max(long_v), 0) from ts_kv where entity_id ='{device_id}'  and ts={day} ) END ) AS {var}, \n".format(var=var, field='dbl_v', device_id=device_id, day=time.mktime(dt.timetuple()))
-#        elif :
-#            sql = sql + "MAX(CASE WHEN vars.key = '{var}' THEN (select  coalesce(Max(dbl_v), 0) + coalesce(Max(long_v), 0) as value from ts_kv where entity_id ={device_id}  and date={day} ) as value END ) AS {var}, \n".format(var=var, field='dbl_v')
-        else:
-            sql = sql + "MAX(CASE WHEN vars.key = '{var}' THEN values.{field} END) AS {var}, \n".format(var=var,
-                                                                                                    field='dbl_v')
+        sql = sql + "MAX(CASE WHEN vars.key = '{var}' THEN coalesce(dbl_v, 0) + coalesce(long_v, 0) END) AS {var}, \n".format(var=var)
 
     if device_id:
         sql = sql + """count(*) as num_vars 
@@ -188,7 +183,7 @@ def run(prometheus_url, start, end, postgres, bucket, bastion_host, bastion_user
                 print('GETTING DAY: ', day)
                 for device_id in device_filter:
                     sql = build_sql(day.strftime("%Y-%m-%d"), device_id)
-                    print(sql)
+                    #print(sql)
                     cur.execute(sql)
                     num_rows = cur.rowcount
                     data = []
