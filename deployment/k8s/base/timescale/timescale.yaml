@@ -31,7 +31,8 @@ spec:
       terminationGracePeriodSeconds: 60
       containers:
       - name: timescaledb
-        image: timescale/timescaledb:latest-pg12
+#        image: timescale/timescaledb:latest-pg12
+        image: timescale/timescaledb-ha:pg14-latest
         env:
           - name: POSTGRES_PASSWORD
             value: admin
