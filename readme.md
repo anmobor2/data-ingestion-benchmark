@@ -141,5 +141,5 @@ Victoria Metrics:
 Influx DB:
 
     # Setup influxdb
-    helm upgrade --install influxdb influxdata/influxdb2 -n data-ingestion --set adminUser.password=circutoradmin --set adminUser.token=eDXVGwuHS2BtHLkfx46874s687s --set persistence.size=5Gi
+    helm upgrade --install influxdb influxdata/influxdb2 -n data-ingestion --set adminUser.password=xxxxxxxxxx --set adminUser.token=xxx --set persistence.size=5Gi
     
