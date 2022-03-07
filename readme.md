@@ -86,7 +86,7 @@ Get data from Thingsboard to S3
 
     python3 -m app.tbextract.main \
         --bastion-host=54.171.211.53 --bastion-user=ec2-user --bastion-key=~/cluster-bastion.pem \
-        --postgres="postgresql://tsdbadmin:XXXXXX@tsdb-27c921-circutor-f875.a.timescaledb.io:19637/production" \
+        --postgres="postgresql://tsdbadmin:XXXXXX@tsdb-27c921-circutor-f875.a.timescaledb.io:19637/playground" \
         --start=2022-02-01 --end=2022-02-02 --device-filter-file=samples/devicesfile.txt --bucket
 
 
