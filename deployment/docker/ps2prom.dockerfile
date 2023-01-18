@@ -1,3 +1,4 @@
+# python 3.8 gives problems
 FROM python:3.9
 WORKDIR /code
 COPY ../../requirements.txt /code/requirements.txt
