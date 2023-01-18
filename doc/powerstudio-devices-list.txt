@@ -1,15 +1,2 @@
 Equipos01 -> powerstudio -> buscar equips i buscar descripcion
 EDS -> comptador de aigua i sonda de temperatura
-
-0CR02-0: comptador general circutor
-
-0CR04-1 Raption
-4CR02-12 punt de recarrega
-4CR02-13 punt de recarrega
-0CR04-3 punt de recarrega
-0CR04-4 punt de recarrega
-0CR04-5 punt de recarrega
-0CR04-6 punt de recarrega
-0CR04-7 punt de recarrega
-EDS_AGUA punt de recarrega
-0CR04-2 punt de recarrega
