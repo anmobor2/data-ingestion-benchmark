@@ -32,6 +32,5 @@ def run():
                 write(ts, value=float(record["values"][var]), metric=var, labels={"device": "0CR04-1.AC-Meter", "deviceType": "raption22"})
 
 
-
 if __name__ == "__main__":
     run()
