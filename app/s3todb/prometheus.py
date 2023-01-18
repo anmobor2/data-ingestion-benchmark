@@ -1,3 +1,4 @@
+# filtering type data to get
 import click
 import boto3
 import json
