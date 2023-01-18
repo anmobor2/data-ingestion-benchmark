@@ -6,7 +6,7 @@ import random
 
 bucket = "energydata"
 org = "circutor"
-token = "k3TMVP_NnTnMH-NTEwNehH8CzYkzPoshZNUqPQ1SLM8PxA8e-SePmItW-d_wIadXtCNNgMG-weAWOIYlBZNUzw=="
+token = "k3TMVP_NnTnMH-NTEwNehH8CzYkzPoshZNUqPQ1SLM8PxA8e-SePmItW-d_wIadXtCNNgMG-weAWOIYlBZNxzw=="
 # Store the URL of your InfluxDB instance
 url="http://localhost:8086"
 
