@@ -1,3 +1,4 @@
+# runner for gitlab in the remote ec2 machine connected and register to the gitlab server by token and url and some more fields
 image: circutor/runner_base:v3
 
 default:
