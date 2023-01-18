@@ -1,3 +1,4 @@
+# one column for each field, one row for all 
 import click
 import json
 import psycopg2
