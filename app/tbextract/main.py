@@ -14,6 +14,7 @@ from pathlib import Path
 
 # https://gist.github.com/deehzee/53c8708417312e5deb32c58b73dca7a5
 
+# thingsboard fields in variables
 # variables = [
 #     "OPERATING_HOURS", "PH_CON_TOT", "PH_GEN_TOT", "QH_Q1_TOT", "QH_Q2_TOT", "QH_Q3_TOT", "QH_Q4_TOT", "REPAIR_HOURS",
 #     "V_PP", "THDV_PP", "THDI"
