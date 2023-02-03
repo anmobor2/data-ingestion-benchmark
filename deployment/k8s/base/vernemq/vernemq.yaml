@@ -1,3 +1,4 @@
+# deployment and service svc
 apiVersion: apps/v1
 kind: Deployment
 metadata:

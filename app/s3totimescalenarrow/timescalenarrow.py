@@ -1,3 +1,4 @@
+# Narrow only one column
 import click
 import json
 import psycopg2

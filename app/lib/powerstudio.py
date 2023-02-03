@@ -1,4 +1,5 @@
 import requests
+#settings for powerstudio
 from xml.dom.minidom import parse, parseString
 import xmltodict
 from datetime import datetime
